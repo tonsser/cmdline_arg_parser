@@ -37,24 +37,29 @@ $ #{@specifics.script_name} #{subcommand.command}
               lines << "-#{option.short_key} #{option_label}"
             end
 
-            option_description = @specifics.option_description(
-              subcommand: subcommand.command,
-              option_key: option.long_key,
+            lines << indent(
+              @specifics.option_description_for(
+                subcommand: subcommand.command,
+                option_key: option.long_key,
+              ) + "\n",
+              2
             )
-            lines << indent("#{option_description}\n", 2)
 
             lines.join("\n")
           end
 
           switch_descriptions = subcommand.switches.map do |switch|
-            lines = []
+            lines = [""]
             lines << "--#{switch.long_key}"
             if switch.short_key
               lines << "-#{short_key.long_key}"
             end
-            lines << @specifics.switch_label(
-              subcommand: subcommand.command,
-              switch_key: switch.long_key,
+            lines << indent(
+              @specifics.switch_label_for(
+                subcommand: subcommand.command,
+                switch_key: switch.long_key,
+              ),
+              2
             )
             lines.join("\n")
           end
@@ -63,11 +68,11 @@ $ #{@specifics.script_name} #{subcommand.command}
           subcommand_description += indent(switch_descriptions.join("\n"), 4)
         end
 
-        indent(subcommand_description, 2)
+        indent(subcommand_description, 2) + "\n"
       end
       output += subcommand_descriptions.join("\n")
 
-      output.chomp
+      output.chomp.gsub("\n\n\n", "\n\n")
     end
 
     private

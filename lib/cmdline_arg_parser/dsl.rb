@@ -19,6 +19,10 @@ module CmdlineArgParser
       parser.parse(argv)
     end
 
+    def build_readme(builder)
+      parser.build_readme(builder)
+    end
+
     def parser
       @subcommands ||= []
       @parser ||= Parser.new(subcommands: @subcommands)

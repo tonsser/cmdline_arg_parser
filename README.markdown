@@ -4,6 +4,8 @@ A small library for parsing command-line arguments in Ruby.
 
 Designed to be used with command-line tools like `git` which have a set of subcommands that each have different options and switches.
 
+[On rubygems.org](https://rubygems.org/gems/cmdline_arg_parser)
+
 ## Sample
 
 ```ruby
@@ -14,7 +16,8 @@ class ParserFromDsl
   extend CmdlineArgParser::Dsl
 
   subcommand "merge" do
-    option "branch", short_key: "b"
+    option "branches", multiple: true, short_key: "b"
+    option "into", default: "master"
     option("from-step") { |value| value.to_i }
     switch "dry-run"
   end
@@ -23,13 +26,13 @@ class ParserFromDsl
 end
 
 # Have some ARGV
-ARGV = ["merge", "--dry-run", "--from-step", "10", "-b", "release-branch"]
+ARGV = ["merge", "--dry-run", "--from-step", "10", "-b", "release-branch", "other-branch"]
 
 args = ParserFromDsl.parse(ARGV)
 
 # Accessing the parsed data
 args.subcommand # => "merge"
-args.options # => { "branch" => "release-branch", "from-step" => 10 }
+args.options # => { "into" => "master", "branches" => ["release-branch", "other-branch"], "from-step" => 10 }
 args.switches # => Set.new(["dry-run"])
 ```
 
@@ -41,7 +44,8 @@ parser = CmdlineArgParser::Parser.new(
     CmdlineArgParser::Parser::Subcommand.new(
       "merge",
       options: [
-        CmdlineArgParser::Parser::Option.new("branch", short_key: "b"),
+        CmdlineArgParser::Parser::Option.new("branches", multiple: true, short_key: "b"),
+        CmdlineArgParser::Parser::Option.new("into", default: "master"),
         CmdlineArgParser::Parser::Option.new("from-step") { |value| value.to_i },
       ],
       switches: [
@@ -52,6 +56,26 @@ parser = CmdlineArgParser::Parser.new(
   ]
 )
 ```
+
+### Readme generation
+
+TODO
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+```ruby
+gem "cmdline_arg_parser"
+```
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install cmdline_arg_parser
 
 ## Built by
 

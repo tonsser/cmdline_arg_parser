@@ -36,8 +36,14 @@ module CmdlineArgParser
 
       attr_reader :options, :switches
 
-      def option(name, short_key: nil, &block)
-        @options << Parser::Option.new(name, short_key: short_key, &block)
+      def option(name, default: nil, multiple: false, short_key: nil, &block)
+        @options << Parser::Option.new(
+          name,
+          multiple: multiple,
+          short_key: short_key,
+          default: default,
+          &block
+        )
       end
 
       def switch(name, short_key: nil)

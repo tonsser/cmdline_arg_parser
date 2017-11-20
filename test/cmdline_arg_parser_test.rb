@@ -149,6 +149,48 @@ to continue from a certain point after having fixed the problem.
     )
   end
 
+  def test_parsing_multiple_values_to_one_arg
+    parser = Class.new do
+      extend CmdlineArgParser::Dsl
+
+      subcommand "merge" do
+        option "branches", multiple: true, short_key: "b"
+      end
+    end
+
+    assert_parser_result(
+      parser,
+      command: "api-git merge -b master develop",
+      subcommand: "merge",
+      options: { "branches" => ["master", "develop"] },
+    )
+  end
+
+  def test_parse_with_defaults
+    parser = Class.new do
+      extend CmdlineArgParser::Dsl
+
+      subcommand "merge" do
+        option "branch", short_key: "b"
+        option "into", short_key: "i", default: "master"
+      end
+    end
+
+    assert_parser_result(
+      parser,
+      command: "api-git merge -b develop",
+      subcommand: "merge",
+      options: { "branch" => "develop", "into" => "master" },
+    )
+
+    assert_parser_result(
+      parser,
+      command: "api-git merge -b develop -i staging",
+      subcommand: "merge",
+      options: { "branch" => "develop", "into" => "staging" },
+    )
+  end
+
   private
 
   def assert_parser_result(parser, command:, subcommand: nil, options: nil, switches: nil)

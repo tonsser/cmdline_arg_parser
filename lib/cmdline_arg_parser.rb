@@ -50,9 +50,11 @@ module CmdlineArgParser
     end
 
     class Option
-      def initialize(long_key, short_key: nil, &block)
+      def initialize(long_key, default: nil, multiple: false, short_key: nil, &block)
         @long_key = long_key
         @short_key = short_key
+        @multiple = multiple
+        @default = default
         @block = block
       end
 
@@ -62,16 +64,40 @@ module CmdlineArgParser
         index_of_key = argv.find_index do |word|
           word == "--#{@long_key}" || word == "-#{@short_key}"
         end
+
+        if index_of_key.nil?
+          if @default.nil?
+            msg = "Missing argument --#{@long_key}"
+            if @short_key
+              msg += " or -#{@short_key}"
+            end
+            raise ParseError, msg
+          else
+            out.set_option(@long_key, @default)
+            return
+          end
+        end
+
         index_of_value = index_of_key + 1
 
-        value = argv[index_of_value]
-        if @block
-          value = @block.call(value)
-        end
-        out.set_option(@long_key, value)
+        if @multiple
+          argv.delete_at(index_of_key)
+          values = argv.take_while { |value| !(value =~ /^-/) }
+          values.length.times { argv.delete_at(0) }
 
-        argv.delete_at(index_of_key)
-        argv.delete_at(index_of_value - 1)
+          if @block
+            values = values.map { |value| @block.call(value) }
+          end
+          out.set_option(@long_key, values)
+        else
+          value = argv[index_of_value]
+          if @block
+            value = @block.call(value)
+          end
+          out.set_option(@long_key, value)
+          argv.delete_at(index_of_key)
+          argv.delete_at(index_of_value - 1)
+        end
       end
     end
 

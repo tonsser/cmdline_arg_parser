@@ -1,3 +1,4 @@
+require "set"
 require "cmdline_arg_parser/version"
 require "cmdline_arg_parser/readme_builder"
 require "cmdline_arg_parser/dsl"

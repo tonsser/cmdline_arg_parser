@@ -51,6 +51,10 @@ module CmdlineArgParser
 
     class Option
       def initialize(long_key, default: nil, multiple: false, short_key: nil, &block)
+        if short_key && short_key.length != 1
+          raise ArgumentError, "`short_key` can only be one character, was #{short_key.inspect}"
+        end
+
         @long_key = long_key
         @short_key = short_key
         @multiple = multiple
@@ -103,6 +107,10 @@ module CmdlineArgParser
 
     class Switch
       def initialize(long_key, short_key: nil)
+        if short_key && short_key.length != 1
+          raise ArgumentError, "`short_key` can only be one character"
+        end
+
         @long_key = long_key
         @short_key = short_key
       end
@@ -116,9 +124,8 @@ module CmdlineArgParser
 
         if index_of_key
           out.set_switch(@long_key)
+          argv.delete_at(index_of_key)
         end
-
-        argv.delete_at(index_of_key)
       end
     end
   end

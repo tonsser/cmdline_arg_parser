@@ -103,10 +103,10 @@ class CmdlineArgParserTest < Minitest::Test
           "merge" => {
             "branch" => "Name of branch to merge into",
             "from-step" => <<-EOS.chomp
-Run through the commands starting at step number STEP. Zero indexed.
-This can be used when something breaks halfway through and you want
-to continue from a certain point after having fixed the problem.
-            EOS
+            Run through the commands starting at step number STEP. Zero indexed.
+              This can be used when something breaks halfway through and you want
+            to continue from a certain point after having fixed the problem.
+              EOS
           }
         }.fetch(subcommand).fetch(option_key)
       end
@@ -121,8 +121,9 @@ to continue from a certain point after having fixed the problem.
       end
     end.new
 
-    actual = parser.build_readme(readme_builder)
+    parser.build_readme(readme_builder)
 
+    # actual = parser.build_readme(readme_builder)
     # puts actual
     # raise "Just testing"
   end
@@ -188,6 +189,24 @@ to continue from a certain point after having fixed the problem.
       command: "api-git merge -b develop -i staging",
       subcommand: "merge",
       options: { "branch" => "develop", "into" => "staging" },
+    )
+  end
+
+  def test_with_optional_switch
+    parser = Class.new do
+      extend CmdlineArgParser::Dsl
+
+      subcommand "production" do
+        switch "dry-run"
+      end
+    end
+
+    assert_parser_result(
+      parser,
+      command: "api-git production",
+      subcommand: "production",
+      options: {},
+      switches: [],
     )
   end
 

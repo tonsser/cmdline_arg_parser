@@ -1,11 +1,19 @@
 require "test_helper"
 
 class CmdlineArgParserTest < Minitest::Test
-  def test_that_it_has_a_version_number
+  class << self
+    def test(name, focus_on_this_test = nil, &block)
+      define_method("test_#{name}") do
+        instance_eval(&block)
+      end
+    end
+  end
+
+  test "that_it_has_a_version_number" do
     refute_nil ::CmdlineArgParser::VERSION
   end
 
-  def test_parsing_args_with_one_subcommand
+  test "parsing_args_with_one_subcommand" do
     parser = CmdlineArgParser::Parser.new(
       subcommands: [CmdlineArgParser::Parser::Subcommand.new("help")],
     )
@@ -17,7 +25,7 @@ class CmdlineArgParserTest < Minitest::Test
     )
   end
 
-  def test_parsing_subcommand_with_two_options
+  test "parsing_subcommand_with_two_options" do
     parser = CmdlineArgParser::Parser.new(
       subcommands: [
         CmdlineArgParser::Parser::Subcommand.new(
@@ -51,7 +59,7 @@ class CmdlineArgParserTest < Minitest::Test
     )
   end
 
-  def test_building_readme
+  test "building_readme" do
     parser = CmdlineArgParser::Parser.new(
       subcommands: [
         CmdlineArgParser::Parser::Subcommand.new(
@@ -140,7 +148,7 @@ class CmdlineArgParserTest < Minitest::Test
     subcommand "version"
   end
 
-  def test_building_with_dsl
+  test "building_with_dsl" do
     assert_parser_result(
       ParserFromDsl,
       command: "api-git merge --dry-run --from-step 10 -b release-branch",
@@ -150,7 +158,7 @@ class CmdlineArgParserTest < Minitest::Test
     )
   end
 
-  def test_parsing_multiple_values_to_one_arg
+  test "parsing_multiple_values_to_one_arg" do
     parser = Class.new do
       extend CmdlineArgParser::Dsl
 
@@ -167,7 +175,7 @@ class CmdlineArgParserTest < Minitest::Test
     )
   end
 
-  def test_parse_with_defaults
+  test "parse_with_defaults" do
     parser = Class.new do
       extend CmdlineArgParser::Dsl
 
@@ -192,7 +200,7 @@ class CmdlineArgParserTest < Minitest::Test
     )
   end
 
-  def test_with_optional_switch
+  test "with_optional_switch" do
     parser = Class.new do
       extend CmdlineArgParser::Dsl
 
@@ -207,6 +215,25 @@ class CmdlineArgParserTest < Minitest::Test
       subcommand: "production",
       options: {},
       switches: [],
+    )
+  end
+
+  test "multiple_shorthand_switches" do
+    parser = Class.new do
+      extend CmdlineArgParser::Dsl
+
+      subcommand "merge" do
+        switch "foo", short_key: "f"
+        switch "bar", short_key: "b"
+        switch "qux", short_key: "q"
+      end
+    end
+
+    assert_parser_result(
+      parser,
+      command: "api-git merge -fq -b",
+      subcommand: "merge",
+      switches: ["foo", "bar", "qux"]
     )
   end
 

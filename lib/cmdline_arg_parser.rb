@@ -16,6 +16,8 @@ module CmdlineArgParser
     def parse(argv)
       parsed_args = ParsedArgs.new
 
+      argv = expand_shorthand_switches(argv)
+
       @subcommands.each do |subcommand|
         subcommand.try_parse(argv, parsed_args)
       end
@@ -29,6 +31,18 @@ module CmdlineArgParser
 
     def build_readme(builder)
       ReadmeBuilder.new(parser: self, specifics: builder).build
+    end
+
+    private
+
+    def expand_shorthand_switches(argv)
+      argv.flat_map do |arg|
+        if arg =~ /^-[a-z]/
+          arg[1..-1].split("").map { |arg| "-#{arg}" }
+        else
+          arg
+        end
+      end
     end
 
     class Subcommand
